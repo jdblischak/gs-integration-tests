@@ -32,7 +32,7 @@ jobs:
         run: install.packages(c("devtools", "remotes", "sessioninfo"))
 
       - name: Install qpdf
-        run: apt-get install --yes qpdf
+        run: sudo apt-get install --yes qpdf
         shell: bash
 
       - name: Clone gsDesign
