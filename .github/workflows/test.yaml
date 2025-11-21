@@ -1,0 +1,83 @@
+name: Integration tests
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/test.yaml'
+  # "At 07:24 on Monday."
+  # https://crontab.guru/#24_07_*_*_1
+  schedule:
+    - cron: "24 07 * * 1"
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: Rscript {0}
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    env:
+      NOT_CRAN: TRUE
+    steps:
+
+      - name: Setup r2u
+        uses: eddelbuettel/github-actions/r2u-setup@master
+        with:
+          bspm-version-check: "FALSE"
+
+      - name: Install utility packages
+        run: install.packages(c("devtools", "remotes", "sessioninfo"))
+
+      - name: Clone gsDesign
+        uses: actions/checkout@v4
+        with:
+          repository: keaven/gsDesign
+          ref: master
+          path: gsDesign
+
+      - name: Clone gsDesign2
+        uses: actions/checkout@v4
+        with:
+          repository: Merck/gsDesign2
+          ref: main
+          path: gsDesign2
+
+      - name: Clone simtrial
+        uses: actions/checkout@v4
+        with:
+          repository: Merck/simtrial
+          ref: master
+          path: simtrial
+
+      - name: Install dependencies (gsDesign)
+        run: remotes::install_deps("gsDesign", dependencies = TRUE)
+
+      - name: Install dependencies (gsDesign2)
+        run: remotes::install_deps("gsDesign2", dependencies = TRUE)
+
+      - name: Install dependencies (simtrial)
+        run: remotes::install_deps("simtrial", dependencies = TRUE)
+
+      - name: Session information
+        run: sessioninfo::session_info()
+
+      - name: Install gsDesign
+        run: devtools::install("gsDesign")
+
+      - name: Install gsDesign2
+        run: devtools::install("gsDesign2")
+
+      - name: Install simtrial
+        run: devtools::install("simtrial")
+
+      - name: Test gsDesign
+        run: devtools::check("gsDesign")
+
+      - name: Test gsDesign2
+        run: devtools::check("gsDesign2")
+
+      - name: Test simtrial
+        run: devtools::check("simtrial")
