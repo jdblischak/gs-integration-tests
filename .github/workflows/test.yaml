@@ -31,6 +31,10 @@ jobs:
       - name: Install utility packages
         run: install.packages(c("devtools", "remotes", "sessioninfo"))
 
+      - name: Install qpdf
+        run: apt-get install --yes qpdf
+        shell: bash
+
       - name: Clone gsDesign
         uses: actions/checkout@v4
         with:
