@@ -21,6 +21,7 @@ jobs:
     runs-on: ubuntu-24.04
     env:
       NOT_CRAN: TRUE
+      RCMDCHECK_ERROR_ON: warning
     steps:
 
       - name: Setup r2u
