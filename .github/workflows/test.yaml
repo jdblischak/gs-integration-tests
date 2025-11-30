@@ -78,8 +78,8 @@ jobs:
       - name: Session information
         run: sessioninfo::session_info(pkgs = "installed")
 
-    #   - name: Test gsDesign
-    #     run: devtools::check("gsDesign")
+      - name: Test gsDesign
+        run: devtools::check("gsDesign")
 
       - name: Test gsDesign2
         run: devtools::check("gsDesign2")
