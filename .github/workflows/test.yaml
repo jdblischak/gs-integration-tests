@@ -19,15 +19,32 @@ defaults:
 jobs:
   test:
     runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        rver: [release, devel]
     env:
       NOT_CRAN: TRUE
       RCMDCHECK_ERROR_ON: warning
     steps:
 
       - name: Setup r2u
+        if: matrix.rver == 'release'
         uses: eddelbuettel/github-actions/r2u-setup@master
         with:
           bspm-version-check: "FALSE"
+
+      - name: Install R
+        if: matrix.rver == 'devel'
+        uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: 'devel'
+          http-user-agent: 'release'
+          use-public-rspm: true
+
+      - name: Install pandoc
+        if: matrix.rver == 'devel'
+        uses: r-lib/actions/setup-pandoc@v2
 
       - name: Install utility packages
         run: install.packages(c("devtools", "remotes", "sessioninfo"))
