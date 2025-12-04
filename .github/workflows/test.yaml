@@ -11,6 +11,19 @@ on:
   schedule:
     - cron: "24 07 * * 1"
   workflow_dispatch:
+    inputs:
+      GSDESIGN_REF:
+        description: >-
+          The Git reference (tag, branch, commit) to checkout keaven/gsDesign
+        default: master
+      GSDESIGN2_REF:
+        description: >-
+          The Git reference (tag, branch, commit) to checkout Merck/gsDesign2
+        default: main
+      SIMTRIAL_REF:
+        description: >-
+          The Git reference (tag, branch, commit) to checkout Merck/simtrial
+        default: main
 
 defaults:
   run:
@@ -57,21 +70,21 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: keaven/gsDesign
-          ref: master
+          ref: ${{ github.event.inputs.GSDESIGN_REF || 'master' }}
           path: gsDesign
 
       - name: Clone gsDesign2
         uses: actions/checkout@v4
         with:
           repository: Merck/gsDesign2
-          ref: main
+          ref: ${{ github.event.inputs.GSDESIGN2_REF || 'main' }}
           path: gsDesign2
 
       - name: Clone simtrial
         uses: actions/checkout@v4
         with:
           repository: Merck/simtrial
-          ref: main
+          ref: ${{ github.event.inputs.SIMTRIAL_REF || 'main' }}
           path: simtrial
 
       - name: Install dependencies (gsDesign)
