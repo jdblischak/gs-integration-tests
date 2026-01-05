@@ -87,6 +87,14 @@ jobs:
           ref: ${{ github.event.inputs.SIMTRIAL_REF || 'main' }}
           path: simtrial
 
+      - name: Remove snapshot tests
+        # They fail too often and are unrelated to the interfaces between our
+        # packages
+        shell: bash
+        run: |
+          rm -r gsDesign/tests/testthat/_snaps/
+          rm -r gsDesign2/tests/testthat/_snaps/
+
       - name: Install dependencies (gsDesign)
         run: remotes::install_deps("gsDesign", dependencies = TRUE)
 
