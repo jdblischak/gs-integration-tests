@@ -24,6 +24,13 @@ on:
         description: >-
           The Git reference (tag, branch, commit) to checkout Merck/simtrial
         default: main
+      REGENERATE_SNAPSHOTS:
+        description: >-
+          Delete existing snapshots and regenerate them prior to checking the R packages.
+          Avoids test failures due to unrelated changes (eg updates to {gt}) that are
+          already well-tested in the CI in each individual repository. Options are `yes`
+          or `no`.
+        default: yes
 
 defaults:
   run:
@@ -108,11 +115,22 @@ jobs:
       - name: Session information
         run: sessioninfo::session_info(pkgs = "installed")
 
-      - name: Test gsDesign
+      - name: Regenerate snapshots
+        # They fail too often and are unrelated to the interfaces between our
+        # packages
+        if: ${{ github.event.inputs.REGENERATE_SNAPSHOTS == 'yes' }}
+        run: |
+          unlink("gsDesign/tests/testthat/_snaps/", recursive = TRUE, force = TRUE)
+          unlink("gsDesign2/tests/testthat/_snaps/", recursive = TRUE, force = TRUE)
+          testthat::set_max_fails(Inf)
+          devtools::test("gsDesign")
+          devtools::test("gsDesign2")
+
+      - name: Check gsDesign
         run: devtools::check("gsDesign")
 
-      - name: Test gsDesign2
+      - name: Check gsDesign2
         run: devtools::check("gsDesign2")
 
-      - name: Test simtrial
+      - name: Check simtrial
         run: devtools::check("simtrial")
