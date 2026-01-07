@@ -87,14 +87,6 @@ jobs:
           ref: ${{ github.event.inputs.SIMTRIAL_REF || 'main' }}
           path: simtrial
 
-      - name: Remove snapshot tests
-        # They fail too often and are unrelated to the interfaces between our
-        # packages
-        shell: bash
-        run: |
-          rm -r gsDesign/tests/testthat/_snaps/
-          rm -r gsDesign2/tests/testthat/_snaps/
-
       - name: Install dependencies (gsDesign)
         run: remotes::install_deps("gsDesign", dependencies = TRUE)
 
@@ -116,20 +108,15 @@ jobs:
       - name: Session information
         run: sessioninfo::session_info(pkgs = "installed")
 
-      - name: Test gsDesign
+      - name: Regenerate snapshots
+        # They fail too often and are unrelated to the interfaces between our
+        # packages
         run: |
+          unlink("gsDesign/tests/testthat/_snaps/", recursive = TRUE, force = TRUE)
+          unlink("gsDesign2/tests/testthat/_snaps/", recursive = TRUE, force = TRUE)
           testthat::set_max_fails(Inf)
           devtools::test("gsDesign")
-
-      - name: Test gsDesign2
-        run: |
-          testthat::set_max_fails(Inf)
           devtools::test("gsDesign2")
-
-      - name: Test simtrial
-        run: |
-          testthat::set_max_fails(Inf)
-          devtools::test("simtrial")
 
       - name: Check gsDesign
         run: devtools::check("gsDesign")
