@@ -118,7 +118,7 @@ jobs:
       - name: Regenerate snapshots
         # They fail too often and are unrelated to the interfaces between our
         # packages
-        if: ${{ github.event.inputs.REGENERATE_SNAPSHOTS == 'yes' }}
+        if: github.event.inputs.REGENERATE_SNAPSHOTS == 'yes' || github.event_name == 'schedule'
         run: |
           unlink("gsDesign/tests/testthat/_snaps/", recursive = TRUE, force = TRUE)
           unlink("gsDesign2/tests/testthat/_snaps/", recursive = TRUE, force = TRUE)
