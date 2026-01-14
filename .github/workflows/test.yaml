@@ -114,6 +114,8 @@ jobs:
 
       - name: Install ragg from source
         if: matrix.rver == 'devel'
+        env:
+          GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
         run: remotes::install_github("r-lib/ragg")
 
       - name: Session information
