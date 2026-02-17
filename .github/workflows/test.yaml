@@ -44,8 +44,8 @@ jobs:
       matrix:
         rver: [release, devel]
     env:
-      # Note: This is dynamically set to NOT_CRAN=FALSE for R-devel
-      NOT_CRAN: TRUE
+      # Note: This is dynamically set to NOT_CRAN=false for R-devel
+      NOT_CRAN: true
       RCMDCHECK_ERROR_ON: warning
     steps:
 
@@ -127,16 +127,16 @@ jobs:
           devtools::test("gsDesign")
           devtools::test("gsDesign2")
 
-      - name: Set NOT_CRAN=FALSE for R-devel
+      - name: Set NOT_CRAN=false for R-devel
         if: matrix.rver == 'devel'
-        run: echo "NOT_CRAN=FALSE" >> $GITHUB_ENV
+        run: echo "NOT_CRAN=false" >> $GITHUB_ENV
         shell: bash
 
       - name: Check gsDesign
-        run: devtools::check("gsDesign")
+        run: devtools::check("gsDesign", env_vars = c(NOT_CRAN = Sys.getenv("NOT_CRAN")))
 
       - name: Check gsDesign2
-        run: devtools::check("gsDesign2")
+        run: devtools::check("gsDesign2", env_vars = c(NOT_CRAN = Sys.getenv("NOT_CRAN")))
 
       - name: Check simtrial
-        run: devtools::check("simtrial")
+        run: devtools::check("simtrial", env_vars = c(NOT_CRAN = Sys.getenv("NOT_CRAN")))
