@@ -104,13 +104,13 @@ jobs:
         run: remotes::install_deps("simtrial", dependencies = TRUE)
 
       - name: Install gsDesign
-        run: devtools::install("gsDesign")
+        run: devtools::install("gsDesign", dependencies = FALSE, upgrade = FALSE)
 
       - name: Install gsDesign2
-        run: devtools::install("gsDesign2")
+        run: devtools::install("gsDesign2", dependencies = FALSE, upgrade = FALSE)
 
       - name: Install simtrial
-        run: devtools::install("simtrial")
+        run: devtools::install("simtrial", dependencies = FALSE, upgrade = FALSE)
 
       - name: Session information
         run: sessioninfo::session_info(pkgs = "installed")
