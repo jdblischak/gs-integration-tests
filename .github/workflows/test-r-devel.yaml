@@ -1,0 +1,120 @@
+name: Integration tests (R-devel)
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/test-r-devel.yaml'
+  workflow_dispatch:
+    inputs:
+      GSDESIGN_REF:
+        description: >-
+          The Git reference (tag, branch, commit) to checkout keaven/gsDesign
+        default: master
+      GSDESIGN2_REF:
+        description: >-
+          The Git reference (tag, branch, commit) to checkout Merck/gsDesign2
+        default: main
+      SIMTRIAL_REF:
+        description: >-
+          The Git reference (tag, branch, commit) to checkout Merck/simtrial
+        default: main
+      REGENERATE_SNAPSHOTS:
+        description: >-
+          Delete existing snapshots and regenerate them prior to checking the R packages.
+          Avoids test failures due to unrelated changes (eg updates to {gt}) that are
+          already well-tested in the CI in each individual repository.
+        default: true
+        type: boolean
+
+defaults:
+  run:
+    shell: Rscript {0}
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    env:
+      NOT_CRAN: TRUE
+      RCMDCHECK_ERROR_ON: warning
+    steps:
+
+      - name: Install R
+        uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: 'devel'
+          http-user-agent: 'release'
+          use-public-rspm: true
+
+      - name: Install pandoc
+        uses: r-lib/actions/setup-pandoc@v2
+
+      - name: Install utility packages
+        run: install.packages(c("devtools", "remotes", "sessioninfo"))
+
+      - name: Install qpdf
+        run: sudo apt-get install --yes qpdf
+        shell: bash
+
+      - name: Clone gsDesign
+        uses: actions/checkout@v6
+        with:
+          repository: keaven/gsDesign
+          ref: ${{ github.event.inputs.GSDESIGN_REF || 'master' }}
+          path: gsDesign
+
+      - name: Clone gsDesign2
+        uses: actions/checkout@v6
+        with:
+          repository: Merck/gsDesign2
+          ref: ${{ github.event.inputs.GSDESIGN2_REF || 'main' }}
+          path: gsDesign2
+
+      - name: Clone simtrial
+        uses: actions/checkout@v6
+        with:
+          repository: Merck/simtrial
+          ref: ${{ github.event.inputs.SIMTRIAL_REF || 'main' }}
+          path: simtrial
+
+      - name: Install dependencies (gsDesign)
+        run: remotes::install_deps("gsDesign", dependencies = TRUE)
+
+      - name: Install dependencies (gsDesign2)
+        run: remotes::install_deps("gsDesign2", dependencies = TRUE)
+
+      - name: Install dependencies (simtrial)
+        run: remotes::install_deps("simtrial", dependencies = TRUE)
+
+      - name: Install gsDesign
+        run: devtools::install("gsDesign", dependencies = FALSE, upgrade = FALSE)
+
+      - name: Install gsDesign2
+        run: devtools::install("gsDesign2", dependencies = FALSE, upgrade = FALSE)
+
+      - name: Install simtrial
+        run: devtools::install("simtrial", dependencies = FALSE, upgrade = FALSE)
+
+      - name: Session information
+        run: sessioninfo::session_info(pkgs = "installed")
+
+      - name: Regenerate snapshots
+        # They fail too often and are unrelated to the interfaces between our
+        # packages
+        if: inputs.REGENERATE_SNAPSHOTS || github.event_name == 'schedule'
+        run: |
+          unlink("gsDesign/tests/testthat/_snaps/", recursive = TRUE, force = TRUE)
+          unlink("gsDesign2/tests/testthat/_snaps/", recursive = TRUE, force = TRUE)
+          testthat::set_max_fails(Inf)
+          devtools::test("gsDesign")
+          devtools::test("gsDesign2")
+
+      - name: Check gsDesign
+        run: devtools::check("gsDesign")
+
+      - name: Check gsDesign2
+        run: devtools::check("gsDesign2")
+
+      - name: Check simtrial
+        run: devtools::check("simtrial")
