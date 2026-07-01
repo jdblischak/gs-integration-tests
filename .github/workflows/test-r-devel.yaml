@@ -58,21 +58,21 @@ jobs:
         shell: bash
 
       - name: Clone gsDesign
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: keaven/gsDesign
           ref: ${{ github.event.inputs.GSDESIGN_REF || 'master' }}
           path: gsDesign
 
       - name: Clone gsDesign2
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: Merck/gsDesign2
           ref: ${{ github.event.inputs.GSDESIGN2_REF || 'main' }}
           path: gsDesign2
 
       - name: Clone simtrial
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: Merck/simtrial
           ref: ${{ github.event.inputs.SIMTRIAL_REF || 'main' }}
